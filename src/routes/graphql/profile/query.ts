@@ -1,4 +1,5 @@
-import { GraphQLList, GraphQLObjectType } from 'graphql';
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
+import { GraphQLList, GraphQLNonNull, GraphQLObjectType } from 'graphql';
 import { ProfileType } from './type.js';
 import { UUIDType } from '../types/uuid.js';
 import { Profile } from '@prisma/client';
@@ -13,7 +14,7 @@ const profiles = {
 const profile = {
   type: ProfileType as GraphQLObjectType,
   args: {
-    id: { type: UUIDType },
+    id: { type: new GraphQLNonNull(UUIDType) },
   },
   resolve: async (_: unknown, { id }: Profile, { prisma }: Environment) =>
     await prisma.profile.findUnique({ where: { id } }),

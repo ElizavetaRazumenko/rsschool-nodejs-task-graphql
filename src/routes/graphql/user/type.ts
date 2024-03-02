@@ -1,14 +1,20 @@
-import { GraphQLFloat, GraphQLList, GraphQLObjectType, GraphQLString } from 'graphql';
+import {
+  GraphQLFloat,
+  GraphQLList,
+  GraphQLNonNull,
+  GraphQLObjectType,
+  GraphQLString,
+} from 'graphql';
 import { UUIDType } from '../types/uuid.js';
 import { ProfileType } from '../profile/type.js';
-import { Environment, UserSubscribesData } from '../types/environment.js';
+import { Environment } from '../types/environment.js';
 import { User } from '@prisma/client';
 import { PostType } from '../post/type.js';
 
 export const UserType = new GraphQLObjectType({
   name: 'User',
   fields: () => ({
-    id: { type: UUIDType },
+    id: { type: new GraphQLNonNull(UUIDType) },
     name: { type: GraphQLString },
     balance: { type: GraphQLFloat },
     posts: {
@@ -23,17 +29,8 @@ export const UserType = new GraphQLObjectType({
     },
     subscribedToUser: {
       type: new GraphQLList(UserType),
-      async resolve(
-        { id }: UserSubscribesData,
-        _: unknown,
-        { prisma, dataUsers }: Environment,
-      ) {
-        if (Array.isArray(dataUsers) && dataUsers.length) {
-          const user = dataUsers.find((user) => user.id === id);
-          return user ? user.subscribedToUser : null;
-        }
-
-        return await prisma.user.findMany({
+      resolve: async ({ id }: User, _: unknown, { prisma }: Environment) =>
+        await prisma.user.findMany({
           where: {
             userSubscribedTo: {
               some: {
@@ -41,22 +38,12 @@ export const UserType = new GraphQLObjectType({
               },
             },
           },
-        });
-      },
+        }),
     },
     userSubscribedTo: {
       type: new GraphQLList(UserType),
-      async resolve(
-        { id }: UserSubscribesData,
-        _: unknown,
-        { prisma, dataUsers }: Environment,
-      ) {
-        if (Array.isArray(dataUsers) && dataUsers.length) {
-          const user = dataUsers.find((user) => user.id === id);
-          return user ? user.subscribedToUser : null;
-        }
-
-        return await prisma.user.findMany({
+      resolve: async ({ id }: User, __: unknown, { prisma }: Environment) =>
+        await prisma.user.findMany({
           where: {
             subscribedToUser: {
               some: {
@@ -64,8 +51,7 @@ export const UserType = new GraphQLObjectType({
               },
             },
           },
-        });
-      },
+        }),
     },
   }),
 });

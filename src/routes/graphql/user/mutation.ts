@@ -1,4 +1,3 @@
-import { User } from '@prisma/client';
 import { Environment } from '../types/environment.js';
 import { UUIDType } from '../types/uuid.js';
 import { UserType } from './type.js';
@@ -9,41 +8,101 @@ import {
   GraphQLObjectType,
   GraphQLString,
 } from 'graphql';
+import {
+  ChangeUserInputType,
+  CreateUserInputType,
+  DeleteUserInputType,
+  UserSubscriptionType,
+} from '../types/input.js';
 
-const CreateUserInputType = new GraphQLInputObjectType({
-  name: 'CreateUserInputType',
-  fields: {
-    name: { type: new GraphQLNonNull(GraphQLString) },
-    balance: { type: new GraphQLNonNull(GraphQLFloat) },
-  },
+const userInputFields = {
+  name: { type: GraphQLString },
+  balance: { type: GraphQLFloat },
+};
+
+const CreateUserInput = new GraphQLInputObjectType({
+  name: 'CreateUserInput',
+  fields: () => userInputFields,
 });
 
-const ChangeUserInputType = new GraphQLInputObjectType({
-  name: 'ChangeUserInputType',
-  fields: {
-    name: { type: GraphQLString },
-    balance: { type: GraphQLFloat },
-  },
+const ChangeUserInput = new GraphQLInputObjectType({
+  name: 'ChangeUserInput',
+  fields: () => userInputFields,
 });
 
 const createUser = {
   type: UserType as GraphQLObjectType,
-  args: { data: { type: CreateUserInputType } },
-  resolve: async (__: unknown, { data }: { data: User }, { prisma }: Environment) =>
-    await prisma.user.create({ data }),
+  args: { dto: { type: new GraphQLNonNull(CreateUserInput) } },
+  resolve: async (_: unknown, { dto }: CreateUserInputType, { prisma }: Environment) =>
+    await prisma.user.create({ data: dto }),
 };
 
 const changeUser = {
   type: UserType as GraphQLObjectType,
-  args: { id: { type: UUIDType }, data: { type: ChangeUserInputType } },
+  args: {
+    id: { type: new GraphQLNonNull(UUIDType) },
+    dto: { type: new GraphQLNonNull(ChangeUserInput) },
+  },
   resolve: async (
-    __: unknown,
-    { id, data }: { id: string; data: User },
+    _: unknown,
+    { id, dto }: ChangeUserInputType,
     { prisma }: Environment,
-  ) => await prisma.user.update({ where: { id }, data }),
+  ) => await prisma.user.update({ where: { id }, data: dto }),
 };
 
-export const UserMutation = {
+const deleteUser = {
+  type: UUIDType,
+  args: { id: { type: new GraphQLNonNull(UUIDType) } },
+  resolve: async (_: unknown, { id }: DeleteUserInputType, { prisma }: Environment) => {
+    await prisma.user.delete({ where: { id } });
+    return id;
+  },
+};
+
+const subscribeTo = {
+  type: UserType as GraphQLObjectType,
+  args: {
+    userId: { type: new GraphQLNonNull(UUIDType) },
+    authorId: { type: new GraphQLNonNull(UUIDType) },
+  },
+  resolve: async (
+    _: unknown,
+    { userId, authorId }: UserSubscriptionType,
+    { prisma }: Environment,
+  ) =>
+    await prisma.user.update({
+      where: { id: userId },
+      data: { userSubscribedTo: { create: { authorId } } },
+    }),
+};
+
+const unsubscribeFrom = {
+  type: UUIDType,
+  args: {
+    userId: { type: new GraphQLNonNull(UUIDType) },
+    authorId: { type: new GraphQLNonNull(UUIDType) },
+  },
+  resolve: async (
+    _: unknown,
+    { userId, authorId }: UserSubscriptionType,
+    { prisma }: Environment,
+  ) => {
+    await prisma.subscribersOnAuthors.delete({
+      where: {
+        subscriberId_authorId: {
+          subscriberId: userId,
+          authorId,
+        },
+      },
+    });
+    return userId;
+  },
+};
+
+export const UserMutations = {
   createUser,
   changeUser,
+  deleteUser,
+  subscribeTo,
+  unsubscribeFrom,
 };
