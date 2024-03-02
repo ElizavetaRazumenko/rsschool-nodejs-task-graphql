@@ -1,6 +1,12 @@
-import { GraphQLEnumType, GraphQLFloat, GraphQLInt, GraphQLList, GraphQLObjectType } from "graphql";
-import { ProfileType } from "../profile/type.js";
-import { Context } from "../types/context.js";
+import {
+  GraphQLEnumType,
+  GraphQLFloat,
+  GraphQLInt,
+  GraphQLList,
+  GraphQLObjectType,
+} from 'graphql';
+import { ProfileType } from '../profile/type.js';
+import { Environment } from '../types/environment.js';
 import { MemberType as MemberTypePrisma } from '@prisma/client';
 
 enum MemberTypeId {
@@ -8,7 +14,7 @@ enum MemberTypeId {
   BUSINESS = 'business',
 }
 
-export const MemberTypeIdEnum = new GraphQLEnumType({
+export const MemberTypeIdGQLEnum = new GraphQLEnumType({
   name: 'MemberTypeId',
   values: {
     basic: { value: MemberTypeId.BASIC },
@@ -18,15 +24,14 @@ export const MemberTypeIdEnum = new GraphQLEnumType({
 
 export const MemberType = new GraphQLObjectType({
   name: 'MemberType',
-  description: 'MemberType data',
   fields: () => ({
-    id: { type: MemberTypeIdEnum },
+    id: { type: MemberTypeIdGQLEnum },
     discount: { type: GraphQLFloat },
     postsLimitPerMonth: { type: GraphQLInt },
     profiles: {
       type: new GraphQLList(ProfileType),
-      resolve: async (source: MemberTypePrisma, __: unknown, { prisma }: Context) => {
-        const { id } = source;
+      resolve: async (target: MemberTypePrisma, __: unknown, { prisma }: Environment) => {
+        const { id } = target;
         return await prisma.profile.findMany({ where: { memberTypeId: id } });
       },
     },

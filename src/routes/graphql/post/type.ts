@@ -1,21 +1,20 @@
-import { GraphQLNonNull, GraphQLObjectType, GraphQLString } from 'graphql';
+import { GraphQLObjectType, GraphQLString } from 'graphql';
 import { UUIDType } from '../types/uuid.js';
 import { UserType } from '../user/type.js';
 import { Post } from '@prisma/client';
-import { Context } from '../types/context.js';
+import { Environment } from '../types/environment.js';
 
 export const PostType = new GraphQLObjectType({
   name: 'Post',
-  description: 'Post data',
   fields: () => ({
-    id: { type: new GraphQLNonNull(UUIDType) },
-    title: { type: new GraphQLNonNull(GraphQLString) },
-    content: { type: new GraphQLNonNull(GraphQLString) },
-    authorId: { type: new GraphQLNonNull(UUIDType) },
+    id: { type: UUIDType },
+    title: { type: GraphQLString },
+    content: { type: GraphQLString },
+    authorId: { type: UUIDType },
     author: {
-      type: UserType,
-      resolve: async (source: Post, __: unknown, { prisma }: Context) => {
-        const { authorId } = source;
+      type: UserType as GraphQLObjectType,
+      resolve: async (target: Post, __: unknown, { prisma }: Environment) => {
+        const { authorId } = target;
         return prisma.post.findUnique({ where: { id: authorId } });
       },
     },
