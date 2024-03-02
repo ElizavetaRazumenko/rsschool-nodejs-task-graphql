@@ -6,9 +6,8 @@ import { Environment } from '../types/environment.js';
 
 const users = {
   type: new GraphQLList(UserType),
-  resolve: async (_: unknown, __: unknown, { prisma }: Environment) => {
-    return await prisma.user.findMany();
-  },
+  resolve: async (_: unknown, __: unknown, { prisma }: Environment) =>
+    await prisma.user.findMany(),
 };
 
 const user = {
@@ -16,9 +15,8 @@ const user = {
   args: {
     id: { type: UUIDType },
   },
-  resolve: async (_: unknown, { id }: User, { prisma }: Environment) => {
-    return await prisma.user.findFirst({ where: { id } });
-  },
+  resolve: async (_: unknown, { id }: User, { prisma }: Environment) =>
+    await prisma.user.findFirst({ where: { id } }),
 };
 
 export const UserRequest = {

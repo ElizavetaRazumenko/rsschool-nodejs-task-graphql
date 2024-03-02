@@ -2,9 +2,10 @@ import { PrismaClient, User } from '@prisma/client';
 
 export type Environment = {
   prisma: PrismaClient;
+  dataUsers?: UserSubscribesData[];
 }
 
-export interface UserSub extends User {
+export interface UserSubscribesData extends User {
   userSubscribedTo?: UserSubscription[];
   subscribedToUser?: UserSubscription[];
 }

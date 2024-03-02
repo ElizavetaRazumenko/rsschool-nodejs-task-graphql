@@ -6,9 +6,8 @@ import { Environment } from '../types/environment.js';
 
 const posts = {
   type: new GraphQLList(PostType),
-  resolve: async (_: unknown, __: unknown, { prisma }: Environment) => {
-    return await prisma.post.findMany();
-  },
+  resolve: async (_: unknown, __: unknown, { prisma }: Environment) =>
+    await prisma.post.findMany(),
 };
 
 const post = {
@@ -16,9 +15,8 @@ const post = {
   args: {
     id: { type: UUIDType },
   },
-  resolve: async (_: unknown, { id }: Post, { prisma }: Environment) => {
-    return await prisma.post.findUnique({ where: { id } });
-  },
+  resolve: async (_: unknown, { id }: Post, { prisma }: Environment) =>
+    await prisma.post.findUnique({ where: { id } }),
 };
 
 export const PostRequest = {
