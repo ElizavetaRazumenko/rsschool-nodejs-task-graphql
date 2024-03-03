@@ -21,8 +21,8 @@ export const ProfileType = new GraphQLObjectType({
     },
     memberType: {
       type: MemberType as GraphQLObjectType,
-      resolve: async ({ memberTypeId }: Profile, _: unknown, { loaders }: Environment) =>
-        await loaders.memberTypeDataLoader.load(memberTypeId),
+      resolve: async ({ memberTypeId }: Profile, _: unknown, { prisma }: Environment) =>
+        await prisma.memberType.findUnique({ where: { id: memberTypeId } }),
     },
   }),
 });

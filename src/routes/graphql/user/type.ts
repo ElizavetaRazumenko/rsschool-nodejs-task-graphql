@@ -21,39 +21,39 @@ export const UserType = new GraphQLObjectType({
     balance: { type: GraphQLFloat },
     posts: {
       type: new GraphQLList(PostType),
-      resolve: async ({ id }: User, _: unknown, { loaders }: Environment) =>
-        await loaders.postDataLoader.load(id),
+      resolve: async ({ id }: User, _: unknown, { prisma }: Environment) =>
+        await prisma.post.findMany({ where: { authorId: id } }),
     },
     profile: {
       type: ProfileType as GraphQLObjectType,
-      resolve: async ({ id }: User, _: unknown, { loaders }: Environment) =>
-        await loaders.profileDataLoader.load(id),
+      resolve: async ({ id }: User, _: unknown, { prisma }: Environment) =>
+        await prisma.profile.findUnique({ where: { userId: id } }),
     },
     subscribedToUser: {
       type: new GraphQLList(UserType),
-      resolve: async (
-        { subscribedToUser }: UserSubscription,
-        _: unknown,
-        { loaders }: Environment,
-      ) => {
-        if (Array.isArray(subscribedToUser) && subscribedToUser.length) {
-          const subIds = subscribedToUser.map(({ subscriberId }) => subscriberId);
-          return await loaders.userDataLoader.loadMany(subIds);
-        }
-      },
+      resolve: async ({ id }: User, __: unknown, { prisma }: Environment) =>
+        await prisma.user.findMany({
+          where: {
+            userSubscribedTo: {
+              some: {
+                authorId: id,
+              },
+            },
+          },
+        }),
     },
     userSubscribedTo: {
       type: new GraphQLList(UserType),
-      resolve: async (
-        { userSubscribedTo }: UserSubscription,
-        _: unknown,
-        { loaders }: Environment,
-      ) => {
-        if (Array.isArray(userSubscribedTo) && userSubscribedTo.length) {
-          const idArr = userSubscribedTo.map(({ authorId }) => authorId);
-          return await loaders.userDataLoader.loadMany(idArr);
-        }
-      },
+      resolve: async ({ id }: User, __: unknown, { prisma }: Environment) =>
+        await prisma.user.findMany({
+          where: {
+            subscribedToUser: {
+              some: {
+                subscriberId: id,
+              },
+            },
+          },
+        }),
     },
   }),
 });
