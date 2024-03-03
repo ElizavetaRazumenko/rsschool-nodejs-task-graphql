@@ -28,7 +28,7 @@ const users = {
     resolveInfo: GraphQLResolveInfo,
   ) => {
     const include = {};
-    const subFields = [SubscribeFields.SUB_TO_USER, SubscribeFields.USER_SUB_TO];
+    const subFields = [SubscribeFields.USER_SUB_TO, SubscribeFields.SUB_TO_USER];
 
     const { returnType } = resolveInfo;
     const { fields } = simplifyParsedResolveInfoFragmentWithType(
@@ -45,7 +45,7 @@ const users = {
     users.forEach((user) => {
       loaders.userDataLoader.prime(user.id, user);
     });
-    return await prisma.user.findMany({ include });
+    return users;
   },
 };
 

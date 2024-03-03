@@ -7,6 +7,7 @@ import { Environment } from '../types/environment.js';
 
 export const ProfileType = new GraphQLObjectType({
   name: 'Profile',
+  description: 'Profile data',
   fields: () => ({
     id: { type: new GraphQLNonNull(UUIDType) },
     isMale: { type: GraphQLBoolean },

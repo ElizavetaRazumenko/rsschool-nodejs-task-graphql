@@ -22,12 +22,12 @@ const userInputFields = {
 
 const CreateUserInput = new GraphQLInputObjectType({
   name: 'CreateUserInput',
-  fields: () => userInputFields,
+  fields: () => ({ ...userInputFields }),
 });
 
 const ChangeUserInput = new GraphQLInputObjectType({
   name: 'ChangeUserInput',
-  fields: () => userInputFields,
+  fields: () => ({ ...userInputFields }),
 });
 
 const createUser = {

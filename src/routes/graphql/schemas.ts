@@ -30,20 +30,20 @@ export const createGqlResponseSchema = {
 export const query = new GraphQLObjectType({
   name: 'Query',
   fields: () => ({
+    ...UserRequest,
     ...PostRequest,
     ...ProfileRequest,
     ...MemberRequest,
-    ...UserRequest,
   }),
 });
-
-export const graphQLSchema = new GraphQLSchema({ query });
 
 export const mutation = new GraphQLObjectType({
   name: 'Mutation',
   fields: {
     ...PostMutations,
-    ...ProfileMutations,
     ...UserMutations,
+    ...ProfileMutations,
   },
 });
+
+export const graphQLSchema = new GraphQLSchema({ query, mutation });

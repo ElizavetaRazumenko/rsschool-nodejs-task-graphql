@@ -14,6 +14,7 @@ import { UserSubscription } from '../types/userSubscription.js';
 
 export const UserType = new GraphQLObjectType({
   name: 'User',
+  description: 'User data',
   fields: () => ({
     id: { type: new GraphQLNonNull(UUIDType) },
     name: { type: GraphQLString },
@@ -36,9 +37,8 @@ export const UserType = new GraphQLObjectType({
         { loaders }: Environment,
       ) => {
         if (Array.isArray(subscribedToUser) && subscribedToUser.length) {
-          return await loaders.userDataLoader.loadMany(
-            subscribedToUser.map(({ subscriberId }) => subscriberId),
-          );
+          const subIds = subscribedToUser.map(({ subscriberId }) => subscriberId);
+          return await loaders.userDataLoader.loadMany(subIds);
         }
       },
     },
@@ -50,9 +50,8 @@ export const UserType = new GraphQLObjectType({
         { loaders }: Environment,
       ) => {
         if (Array.isArray(userSubscribedTo) && userSubscribedTo.length) {
-          return await loaders.userDataLoader.loadMany(
-            userSubscribedTo.map(({ authorId }) => authorId),
-          );
+          const idArr = userSubscribedTo.map(({ authorId }) => authorId);
+          return await loaders.userDataLoader.loadMany(idArr);
         }
       },
     },
