@@ -15,13 +15,13 @@ export const ProfileType = new GraphQLObjectType({
     memberTypeId: { type: MemberTypeIdGQLEnum },
     user: {
       type: UserType as GraphQLObjectType,
-      resolve: async ({ userId }: Profile, __: unknown, { prisma }: Environment) =>
+      resolve: async ({ userId }: Profile, _: unknown, { prisma }: Environment) =>
         await prisma.user.findUnique({ where: { id: userId } }),
     },
     memberType: {
       type: MemberType as GraphQLObjectType,
-      resolve: async ({ memberTypeId }: Profile, __: unknown, { prisma }: Environment) =>
-        await prisma.memberType.findUnique({ where: { id: memberTypeId } }),
+      resolve: async ({ memberTypeId }: Profile, _: unknown, { loaders }: Environment) =>
+        await loaders.memberTypeDataLoader.load(memberTypeId),
     },
   }),
 });

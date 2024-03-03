@@ -41,7 +41,7 @@ const changeUser = {
   type: UserType as GraphQLObjectType,
   args: {
     id: { type: new GraphQLNonNull(UUIDType) },
-    dto: { type: new GraphQLNonNull(ChangeUserInput) },
+    dto: { type: ChangeUserInput },
   },
   resolve: async (
     _: unknown,

@@ -46,7 +46,7 @@ const changeProfile = {
   type: ProfileType as GraphQLObjectType,
   args: {
     id: { type: new GraphQLNonNull(UUIDType) },
-    dto: { type: new GraphQLNonNull(ChangeProfileInput) },
+    dto: { type: ChangeProfileInput },
   },
   resolve: async (
     _: unknown,
