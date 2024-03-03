@@ -1,8 +1,8 @@
 import { MemberType, PrismaClient } from '@prisma/client';
 import DataLoader from 'dataloader';
 
-export const batchMemberTypeDataLoader = (prisma: PrismaClient) =>
-  new DataLoader<string, MemberType | undefined>(async (keys: readonly string[]) => {
+const batchMemberTypeDataLoader =
+  (prisma: PrismaClient) => async (keys: readonly string[]) => {
     const memberTypeMap = new Map<string, MemberType>();
     const members = await prisma.memberType.findMany({
       where: { id: { in: [...keys] } },
@@ -13,4 +13,7 @@ export const batchMemberTypeDataLoader = (prisma: PrismaClient) =>
     });
 
     return keys.map((key) => memberTypeMap.get(key));
-  });
+  };
+
+export const createMemberTypeLoader = (prisma: PrismaClient) =>
+  new DataLoader(batchMemberTypeDataLoader(prisma));
