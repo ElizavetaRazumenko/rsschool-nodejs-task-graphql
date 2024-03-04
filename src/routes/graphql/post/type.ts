@@ -6,6 +6,7 @@ import { Environment } from '../types/environment.js';
 
 export const PostType = new GraphQLObjectType({
   name: 'Post',
+  description: 'Post data',
   fields: () => ({
     id: { type: new GraphQLNonNull(UUIDType) },
     title: { type: new GraphQLNonNull(GraphQLString) },

@@ -5,6 +5,9 @@ type Subscribe = {
 };
 
 export interface UserSubscription extends User {
-  subscribedToUser?: Subscribe[];
-  userSubscribedTo?: Subscribe[];
+  userSubscribedTo: Subscribe[];
+}
+
+export interface SubscriptionToUser extends User {
+  subscribedToUser: Subscribe[];
 }

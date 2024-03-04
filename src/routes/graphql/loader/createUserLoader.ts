@@ -1,12 +1,11 @@
 import { PrismaClient, User } from '@prisma/client';
 import DataLoader from 'dataloader';
 
-export const batchUserDataLoader = (prisma: PrismaClient) =>
-  new DataLoader<string, User | undefined>(async (keys: readonly string[]) => {
+const batchUserDataLoader =
+  (prisma: PrismaClient) => async (keys: readonly string[]) => {
     const usersMap = new Map<string, User>();
     const users = await prisma.user.findMany({
       where: { id: { in: [...keys] } },
-      include: { userSubscribedTo: true, subscribedToUser: true },
     });
 
     users.forEach((user) => {
@@ -14,4 +13,7 @@ export const batchUserDataLoader = (prisma: PrismaClient) =>
     });
 
     return keys.map((key) => usersMap.get(key));
-  });
+  };
+
+export const createUserLoader = (prisma: PrismaClient) =>
+  new DataLoader(batchUserDataLoader(prisma));

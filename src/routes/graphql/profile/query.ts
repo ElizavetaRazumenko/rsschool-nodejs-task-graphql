@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import { GraphQLList, GraphQLNonNull, GraphQLObjectType } from 'graphql';
 import { ProfileType } from './type.js';
 import { UUIDType } from '../types/uuid.js';

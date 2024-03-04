@@ -21,12 +21,12 @@ const postInputFields = {
 
 const CreatePostInput = new GraphQLInputObjectType({
   name: 'CreatePostInput',
-  fields: () => postInputFields,
+  fields: () => ({ ...postInputFields }),
 });
 
 const ChangePostInput = new GraphQLInputObjectType({
   name: 'ChangePostInput',
-  fields: () => postInputFields,
+  fields: () => ({ ...postInputFields }),
 });
 
 const createPost = {
@@ -49,8 +49,10 @@ const changePost = {
 const deletePost = {
   type: UUIDType,
   args: { id: { type: new GraphQLNonNull(UUIDType) } },
-  resolve: async (_: unknown, { id }: DeletePostInputType, { prisma }: Environment) =>
-    (await prisma.post.delete({ where: { id } })).id,
+  resolve: async (_: unknown, { id }: DeletePostInputType, { prisma }: Environment) => {
+    await prisma.post.delete({ where: { id } });
+    return id;
+  },
 };
 
 export const PostMutations = {

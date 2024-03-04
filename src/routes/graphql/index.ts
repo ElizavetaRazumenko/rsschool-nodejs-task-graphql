@@ -20,7 +20,7 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
     async handler(req) {
       const { query, variables } = req.body;
 
-      const dataLoaders = getDataLoaders(prisma);
+      const loaders = getDataLoaders(prisma);
 
       try {
         const validationErrors = validate(graphQLSchema, parse(query), [depthLimit(5)]);
@@ -36,7 +36,7 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
           variableValues: variables,
           contextValue: {
             prisma,
-            dataLoaders,
+            loaders,
           },
         });
 

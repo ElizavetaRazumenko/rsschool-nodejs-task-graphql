@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import {
   GraphQLBoolean,
   GraphQLInputObjectType,
@@ -25,14 +24,14 @@ const profileInputFields = {
 const CreateProfileInput = new GraphQLInputObjectType({
   name: 'CreateProfileInput',
   fields: () => ({
-    ...profileInputFields,
     userId: { type: UUIDType },
+    ...profileInputFields,
   }),
 });
 
 const ChangeProfileInput = new GraphQLInputObjectType({
   name: 'ChangeProfileInput',
-  fields: () => profileInputFields,
+  fields: () => ({ ...profileInputFields }),
 });
 
 const createProfile = {

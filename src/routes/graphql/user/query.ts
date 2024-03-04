@@ -13,11 +13,7 @@ import {
   parseResolveInfo,
   simplifyParsedResolveInfoFragmentWithType,
 } from 'graphql-parse-resolve-info';
-
-enum SubscribeFields {
-  SUB_TO_USER = 'subscribedToUser',
-  USER_SUB_TO = 'userSubscribedTo',
-}
+import { SubscriptionToUser, UserSubscription } from '../types/userSubscription.js';
 
 const users = {
   type: new GraphQLList(UserType),
@@ -25,27 +21,47 @@ const users = {
     _: unknown,
     __: unknown,
     { prisma, loaders }: Environment,
-    resolveInfo: GraphQLResolveInfo,
+    info: GraphQLResolveInfo,
   ) => {
-    const include = {};
-    const subFields = [SubscribeFields.SUB_TO_USER, SubscribeFields.USER_SUB_TO];
+    const parsedData = parseResolveInfo(info) as ResolveTree;
+    const { userSubscribedToLoader, subscribedToUser } = loaders;
+    const { returnType } = info;
+    const { fields } = simplifyParsedResolveInfoFragmentWithType(parsedData, returnType);
 
-    const { returnType } = resolveInfo;
-    const { fields } = simplifyParsedResolveInfoFragmentWithType(
-      parseResolveInfo(resolveInfo) as ResolveTree,
-      returnType,
-    );
+    const subs = 'subscribedToUser' in fields;
+    const userSubs = 'userSubscribedTo' in fields;
 
-    for (const field of subFields) {
-      include[field] = fields[field] !== undefined;
-    }
-
-    const users = await prisma.user.findMany({ include });
-
-    users.forEach((user) => {
-      loaders.userDataLoader.prime(user.id, user);
+    const users = await prisma.user.findMany({
+      include: {
+        subscribedToUser: subs,
+        userSubscribedTo: userSubs,
+      },
     });
-    return await prisma.user.findMany({ include });
+
+    if (subs || userSubs) {
+      const userMap = new Map<string, UserSubscription | SubscriptionToUser>(
+        users.map((user) => [user.id, user]),
+      );
+      users.forEach((user) => {
+        if (subs) {
+          subscribedToUser.prime(
+            user.id,
+            user.subscribedToUser.map(
+              ({ subscriberId }) => userMap.get(subscriberId) as UserSubscription,
+            ),
+          );
+        }
+        if (userSubs) {
+          userSubscribedToLoader.prime(
+            user.id,
+            user.userSubscribedTo.map(
+              ({ authorId }) => userMap.get(authorId) as SubscriptionToUser,
+            ),
+          );
+        }
+      });
+    }
+    return users;
   },
 };
 
@@ -54,8 +70,8 @@ const user = {
   args: {
     id: { type: new GraphQLNonNull(UUIDType) },
   },
-  resolve: async (_: unknown, { id }: User, { loaders }: Environment) =>
-    await loaders.userDataLoader.load(id),
+  resolve: async (_: unknown, { id }: User, { prisma }: Environment) =>
+    await prisma.user.findUnique({ where: { id } }),
 };
 
 export const UserRequest = {

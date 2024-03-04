@@ -1,3 +1,7 @@
+import { MemberTypeId } from '../../member-types/schemas.js';
+import { ProfileType } from '../profile/type.js';
+import { Environment } from '../types/environment.js';
+import { MemberType as MemberTypePrisma } from '@prisma/client';
 import {
   GraphQLEnumType,
   GraphQLFloat,
@@ -6,14 +10,6 @@ import {
   GraphQLNonNull,
   GraphQLObjectType,
 } from 'graphql';
-import { ProfileType } from '../profile/type.js';
-import { Environment } from '../types/environment.js';
-import { MemberType as MemberTypePrisma } from '@prisma/client';
-
-enum MemberTypeId {
-  BASIC = 'basic',
-  BUSINESS = 'business',
-}
 
 export const MemberTypeIdGQLEnum = new GraphQLEnumType({
   name: 'MemberTypeId',
@@ -25,6 +21,7 @@ export const MemberTypeIdGQLEnum = new GraphQLEnumType({
 
 export const MemberType = new GraphQLObjectType({
   name: 'MemberType',
+  description: 'MemberType data',
   fields: () => ({
     id: { type: new GraphQLNonNull(MemberTypeIdGQLEnum) },
     discount: { type: GraphQLFloat },

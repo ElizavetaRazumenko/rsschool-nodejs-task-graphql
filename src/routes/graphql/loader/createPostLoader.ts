@@ -1,8 +1,8 @@
 import { Post, PrismaClient } from '@prisma/client';
 import DataLoader from 'dataloader';
 
-export const batchPostDataLoader = (prisma: PrismaClient) =>
-  new DataLoader<string, Post[] | undefined>(async (keys: readonly string[]) => {
+const batchPostDataLoader =
+  (prisma: PrismaClient) => async (keys: readonly string[]) => {
     const postsMap = new Map<string, Post[]>();
     const posts = await prisma.post.findMany({
       where: { authorId: { in: [...keys] } },
@@ -14,5 +14,8 @@ export const batchPostDataLoader = (prisma: PrismaClient) =>
       postsMap.set(post.authorId, authorPosts);
     }
 
-    return keys.map((key) => postsMap.get(key));
-  });
+    return keys.map((key) => postsMap.get(key) || []);
+  };
+
+export const createPostsLoader = (prisma: PrismaClient) =>
+  new DataLoader(batchPostDataLoader(prisma));

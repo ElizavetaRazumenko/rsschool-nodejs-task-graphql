@@ -1,12 +1,16 @@
 import { PrismaClient } from '@prisma/client';
-import { batchMemberTypeDataLoader } from './batchMemberType.js';
-import { batchPostDataLoader } from './batchPost.js';
-import { batchProfileDataLoader } from './batchProfile.js';
-import { batchUserDataLoader } from './batchUser.js';
+import { createPostsLoader } from './createPostLoader.js';
+import { createProfileLoader } from './createProfileLoader.js';
+import { createUserLoader } from './createUserLoader.js';
+import { createUserToSubLoader } from './createUserToSubscribeLoader.js';
+import { createSubToUserLoader } from './createSubToUserLoader.js';
+import { createMemberTypeLoader } from './createMemberLoader.js';
 
 export const getDataLoaders = (prisma: PrismaClient) => ({
-  memberTypeDataLoader: batchMemberTypeDataLoader(prisma),
-  postDataLoader: batchPostDataLoader(prisma),
-  profileDataLoader: batchProfileDataLoader(prisma),
-  userDataLoader: batchUserDataLoader(prisma),
+  memberTypeLoader: createMemberTypeLoader(prisma),
+  postsLoader: createPostsLoader(prisma),
+  profileLoader: createProfileLoader(prisma),
+  userLoader: createUserLoader(prisma),
+  subscribedToUser: createSubToUserLoader(prisma),
+  userSubscribedToLoader: createUserToSubLoader(prisma),
 });
